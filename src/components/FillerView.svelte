@@ -591,16 +591,6 @@
                 {/if}
               </div>
             {/if}
-                    <span class="font-bold text-indigo-600 dark:text-indigo-400 truncate">
-                      {slugVal || 'mon-slug'}
-                    </span>
-                    <span class="ml-auto text-[10px] font-sans text-slate-400 shrink-0 hidden sm:inline">
-                      (auto-dérivé)
-                    </span>
-                  </div>
-                {/if}
-              </div>
-            {/if}
 
             <!-- 3. Métadonnées & Champs secondaires (Grille 2 colonnes aérée) -->
             {#if generalFields.length > 0}
