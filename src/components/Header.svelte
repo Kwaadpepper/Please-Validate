@@ -1,12 +1,36 @@
 <script lang="ts">
+  import { onMount } from 'svelte';
   import { appState } from '../lib/storage.svelte';
   import { parsePleaseFile, exportPleaseFile } from '../lib/codec';
   import ShareModal from './ShareModal.svelte';
 
   let isShareOpen = $state(false);
   let isTemplateMenuOpen = $state(false);
+  let isDarkMode = $state(false);
   let fileInputEl: HTMLInputElement | null = $state(null);
   let menuContainerEl: HTMLDivElement | null = $state(null);
+
+  onMount(() => {
+    const saved = localStorage.getItem('please_theme');
+    if (saved === 'dark' || (!saved && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+      isDarkMode = true;
+      document.documentElement.classList.add('dark');
+    } else {
+      isDarkMode = false;
+      document.documentElement.classList.remove('dark');
+    }
+  });
+
+  function toggleDarkMode() {
+    isDarkMode = !isDarkMode;
+    if (isDarkMode) {
+      document.documentElement.classList.add('dark');
+      localStorage.setItem('please_theme', 'dark');
+    } else {
+      document.documentElement.classList.remove('dark');
+      localStorage.setItem('please_theme', 'light');
+    }
+  }
 
   function handleSwitchTemplate(tplId: string) {
     const found = appState.templatesLibrary.find((t) => t.id === tplId);
@@ -107,7 +131,7 @@
         aria-expanded={isTemplateMenuOpen}
         aria-haspopup="menu"
         title="Changer de gabarit ou gérer le gabarit actif"
-        class="w-full flex items-center justify-between gap-2 px-3.5 py-2 bg-slate-50 dark:bg-slate-800/80 hover:bg-slate-100 dark:hover:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs font-semibold text-slate-800 dark:text-slate-100 transition shadow-2xs"
+        class="w-full flex items-center justify-between gap-2 px-3.5 py-2 bg-slate-50 dark:bg-slate-800/80 hover:bg-slate-100 dark:hover:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs font-semibold text-slate-800 dark:text-slate-100 transition shadow-2xs cursor-pointer focus-visible:ring-2 focus-visible:ring-indigo-500"
       >
         <div class="flex items-center gap-2 truncate">
           <span class="text-slate-400 font-normal hidden sm:inline">Gabarit :</span>
@@ -138,7 +162,7 @@
                 type="button"
                 role="menuitem"
                 onclick={() => handleSwitchTemplate(tpl.id)}
-                class="w-full text-left px-3.5 py-2 flex items-center justify-between gap-2 transition
+                class="w-full text-left px-3.5 py-2 flex items-center justify-between gap-2 transition cursor-pointer
                   {isActive
                     ? 'bg-indigo-50/80 dark:bg-indigo-950/50 text-indigo-700 dark:text-indigo-300 font-bold'
                     : 'hover:bg-slate-50 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300'}"
@@ -166,7 +190,7 @@
             type="button"
             role="menuitem"
             onclick={handleCreateTemplate}
-            class="w-full text-left px-3.5 py-2 hover:bg-slate-50 dark:hover:bg-slate-800 flex items-center gap-2.5 transition text-indigo-600 dark:text-indigo-400 font-semibold"
+            class="w-full text-left px-3.5 py-2 hover:bg-slate-50 dark:hover:bg-slate-800 flex items-center gap-2.5 transition text-indigo-600 dark:text-indigo-400 font-semibold cursor-pointer"
           >
             <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
@@ -178,7 +202,7 @@
             type="button"
             role="menuitem"
             onclick={handleExportTemplate}
-            class="w-full text-left px-3.5 py-2 hover:bg-slate-50 dark:hover:bg-slate-800 flex items-center gap-2.5 transition"
+            class="w-full text-left px-3.5 py-2 hover:bg-slate-50 dark:hover:bg-slate-800 flex items-center gap-2.5 transition cursor-pointer"
           >
             <svg class="w-4 h-4 text-slate-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
@@ -190,7 +214,7 @@
             type="button"
             role="menuitem"
             onclick={() => fileInputEl?.click()}
-            class="w-full text-left px-3.5 py-2 hover:bg-slate-50 dark:hover:bg-slate-800 flex items-center gap-2.5 transition"
+            class="w-full text-left px-3.5 py-2 hover:bg-slate-50 dark:hover:bg-slate-800 flex items-center gap-2.5 transition cursor-pointer"
           >
             <svg class="w-4 h-4 text-slate-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
@@ -204,7 +228,7 @@
               type="button"
               role="menuitem"
               onclick={handleDeleteCurrentTemplate}
-              class="w-full text-left px-3.5 py-2 text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/40 flex items-center gap-2.5 transition"
+              class="w-full text-left px-3.5 py-2 text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/40 flex items-center gap-2.5 transition cursor-pointer"
             >
               <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
@@ -231,7 +255,7 @@
         type="button"
         onclick={() => (isShareOpen = true)}
         title="Partager le lien autonome de ce gabarit"
-        class="h-9 px-3 rounded-xl bg-indigo-50 dark:bg-indigo-950/60 hover:bg-indigo-100 dark:hover:bg-indigo-900/60 text-indigo-700 dark:text-indigo-300 border border-indigo-200/80 dark:border-indigo-800/80 text-xs font-semibold flex items-center gap-1.5 transition"
+        class="h-9 px-3 rounded-xl bg-indigo-50 dark:bg-indigo-950/60 hover:bg-indigo-100 dark:hover:bg-indigo-900/60 text-indigo-700 dark:text-indigo-300 border border-indigo-200/80 dark:border-indigo-800/80 text-xs font-semibold flex items-center gap-1.5 transition cursor-pointer focus-visible:ring-2 focus-visible:ring-indigo-500"
       >
         <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" />
@@ -239,12 +263,31 @@
         <span class="hidden sm:inline">Partager</span>
       </button>
 
+      <!-- Bascule Thème Clair / Sombre -->
+      <button
+        type="button"
+        onclick={toggleDarkMode}
+        title={isDarkMode ? "Passer au thème clair" : "Passer au thème sombre"}
+        aria-label={isDarkMode ? "Passer au thème clair" : "Passer au thème sombre"}
+        class="h-9 w-9 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 flex items-center justify-center transition cursor-pointer focus-visible:ring-2 focus-visible:ring-indigo-500"
+      >
+        {#if isDarkMode}
+          <svg class="w-4 h-4 text-amber-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
+          </svg>
+        {:else}
+          <svg class="w-4 h-4 text-slate-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
+          </svg>
+        {/if}
+      </button>
+
       <!-- Toggle Mode Saisie / Gabarit -->
       <nav class="flex items-center gap-0.5 p-1 bg-slate-100 dark:bg-slate-800 rounded-xl" aria-label="Modes de l'application">
         <button
           type="button"
           onclick={() => (appState.viewMode = 'filler')}
-          class="px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition
+          class="px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition cursor-pointer focus-visible:ring-2 focus-visible:ring-indigo-500
             {appState.viewMode === 'filler'
               ? 'bg-white dark:bg-slate-900 text-indigo-600 dark:text-indigo-400 shadow-xs'
               : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'}"
@@ -261,7 +304,7 @@
         <button
           type="button"
           onclick={() => (appState.viewMode = 'builder')}
-          class="px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition
+          class="px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition cursor-pointer focus-visible:ring-2 focus-visible:ring-indigo-500
             {appState.viewMode === 'builder'
               ? 'bg-white dark:bg-slate-900 text-indigo-600 dark:text-indigo-400 shadow-xs'
               : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'}"

@@ -45,7 +45,7 @@
         <button
           type="button"
           onclick={onClose}
-          class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 p-1 rounded-lg"
+          class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 p-1 rounded-lg cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500"
           aria-label="Fermer le rapport"
         >
           <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -113,7 +113,7 @@
             <button
               type="button"
               onclick={handleFilterErrors}
-              class="px-3 py-2 bg-amber-100 hover:bg-amber-200 dark:bg-amber-950 dark:hover:bg-amber-900 text-amber-900 dark:text-amber-200 rounded-lg text-xs font-semibold transition"
+              class="px-3 py-2 bg-amber-100 hover:bg-amber-200 dark:bg-amber-950 dark:hover:bg-amber-900 text-amber-900 dark:text-amber-200 rounded-lg text-xs font-semibold cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-500 transition"
             >
               Afficher uniquement les {report.totalInvalid} lignes en erreur
             </button>
@@ -124,7 +124,7 @@
           <button
             type="button"
             onclick={handleViewAll}
-            class="px-5 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-xs font-semibold shadow-xs transition"
+            class="px-5 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-xs font-semibold shadow-xs cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 transition"
           >
             Consulter les données
           </button>

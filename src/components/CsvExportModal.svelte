@@ -63,7 +63,7 @@
         <button
           type="button"
           onclick={onClose}
-          class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 p-1 rounded-lg"
+          class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 p-1 rounded-lg cursor-pointer focus-visible:ring-2 focus-visible:ring-emerald-500"
           aria-label="Fermer"
         >
           <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -114,7 +114,7 @@
             <select
               id="delimiter-select"
               bind:value={delimiter}
-              class="w-full bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-lg px-3 py-2 text-xs text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-emerald-500"
+              class="w-full bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-lg px-3 py-2 text-xs text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-emerald-500 cursor-pointer"
             >
               <option value=";">Point-virgule (;) — Recommandé Excel France</option>
               <option value=",">Virgule (,) — Standard international</option>
@@ -129,7 +129,7 @@
               <input
                 type="checkbox"
                 bind:checked={withBom}
-                class="rounded text-emerald-600 focus:ring-emerald-500"
+                class="rounded text-emerald-600 focus:ring-emerald-500 cursor-pointer"
               />
               <span>Ajouter le BOM UTF-8 (anti-accents corrompus dans Excel)</span>
             </label>
@@ -141,14 +141,14 @@
         <button
           type="button"
           onclick={onClose}
-          class="px-4 py-2 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 rounded-lg text-xs font-semibold transition"
+          class="px-4 py-2 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 rounded-lg text-xs font-semibold transition cursor-pointer focus-visible:ring-2 focus-visible:ring-emerald-500"
         >
           Annuler
         </button>
         <button
           type="button"
           onclick={handleDownload}
-          class="px-5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-semibold flex items-center gap-2 shadow-sm transition"
+          class="px-5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-semibold flex items-center gap-2 shadow-sm transition cursor-pointer focus-visible:ring-2 focus-visible:ring-emerald-500"
         >
           <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />

@@ -280,7 +280,7 @@
     <div class="grid grid-cols-1 md:grid-cols-2 gap-3.5">
       <div>
         <label for="template-name-input" class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
-          Nom du gabarit <span class="text-rose-500">*</span>
+          Nom du gabarit <span class="text-rose-500 font-bold" aria-hidden="true">*</span><span class="sr-only"> (obligatoire)</span>
         </label>
         <input
           id="template-name-input"
@@ -288,11 +288,14 @@
           bind:value={templateName}
           onblur={saveCurrent}
           placeholder="Ex: Fiches Produits, Articles de Blog, Landing Pages..."
+          aria-required="true"
+          aria-invalid={nameError ? 'true' : 'false'}
+          aria-describedby={nameError ? 'template-name-error' : undefined}
           class="w-full px-3 py-2 rounded-xl border text-xs bg-slate-50 dark:bg-slate-950 font-semibold text-slate-900 dark:text-slate-100 transition focus:outline-none focus:ring-2 focus:ring-indigo-500
             {nameError ? 'border-rose-400 focus:ring-rose-400' : 'border-slate-200 dark:border-slate-800'}"
         />
         {#if nameError}
-          <p class="text-[11px] text-rose-500 mt-1">{nameError}</p>
+          <p id="template-name-error" role="alert" class="text-[11px] text-rose-500 dark:text-rose-400 mt-1">{nameError}</p>
         {/if}
       </div>
 
@@ -395,15 +398,16 @@
             : 'border-slate-200/80 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700'}">
           
           <!-- En-tête compacte toujours visible de la carte -->
-          <div
-            role="button"
-            tabindex="0"
-            onclick={() => toggleFieldExpanded(field.id)}
-            onkeydown={(e) => e.key === 'Enter' && toggleFieldExpanded(field.id)}
-            class="px-4 py-3 flex items-center justify-between gap-3 cursor-pointer select-none"
-          >
-            <!-- Gauche : Emoji, Numéro, Libellé & Badges informatifs -->
-            <div class="flex items-center gap-2.5 min-w-0">
+          <div class="px-4 py-3 flex items-center justify-between gap-3 select-none">
+            <!-- Bouton principal pour déplier/replier -->
+            <button
+              type="button"
+              id={`field-btn-${field.id}`}
+              aria-expanded={isExpanded}
+              aria-controls={`field-panel-${field.id}`}
+              onclick={() => toggleFieldExpanded(field.id)}
+              class="flex items-center gap-2.5 min-w-0 flex-1 text-left cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 rounded-lg p-0.5"
+            >
               <span class="w-6 h-6 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 text-xs font-mono font-bold flex items-center justify-center shrink-0">
                 {index + 1}
               </span>
@@ -418,7 +422,7 @@
 
               <!-- Badge du type avec emoji -->
               <span class="px-2 py-0.5 rounded-md text-[10px] font-medium bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 shrink-0 hidden sm:inline-flex items-center gap-1">
-                <span>{meta.emoji}</span>
+                <span aria-hidden="true">{meta.emoji}</span>
                 <span>{meta.label}</span>
               </span>
 
@@ -437,19 +441,17 @@
                   Optionnel
                 </span>
               {/if}
-            </div>
+            </button>
 
             <!-- Droite : Actions de réorganisation & Chevron déplier/replier -->
-            <div class="flex items-center gap-1 shrink-0" role="group" aria-label="Actions sur le champ">
+            <div class="flex items-center gap-1 shrink-0" role="group" aria-label={`Actions sur le champ ${field.label || field.key}`}>
               <button
                 type="button"
                 disabled={index === 0}
-                onclick={(e) => {
-                  e.stopPropagation();
-                  moveField(index, 'up');
-                }}
+                onclick={() => moveField(index, 'up')}
                 title="Déplacer vers le haut"
-                class="p-1 rounded text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 disabled:opacity-20 transition"
+                aria-label={`Déplacer le champ ${field.label || field.key} vers le haut`}
+                class="p-1 rounded text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 disabled:opacity-20 transition cursor-pointer disabled:cursor-not-allowed focus-visible:ring-2 focus-visible:ring-indigo-500"
               >
                 <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7" />
@@ -459,12 +461,10 @@
               <button
                 type="button"
                 disabled={index === fields.length - 1}
-                onclick={(e) => {
-                  e.stopPropagation();
-                  moveField(index, 'down');
-                }}
+                onclick={() => moveField(index, 'down')}
                 title="Déplacer vers le bas"
-                class="p-1 rounded text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 disabled:opacity-20 transition"
+                aria-label={`Déplacer le champ ${field.label || field.key} vers le bas`}
+                class="p-1 rounded text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 disabled:opacity-20 transition cursor-pointer disabled:cursor-not-allowed focus-visible:ring-2 focus-visible:ring-indigo-500"
               >
                 <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
@@ -473,12 +473,10 @@
 
               <button
                 type="button"
-                onclick={(e) => {
-                  e.stopPropagation();
-                  duplicateField(index);
-                }}
+                onclick={() => duplicateField(index)}
                 title="Dupliquer ce champ"
-                class="p-1 rounded text-slate-400 hover:text-indigo-600 transition"
+                aria-label={`Dupliquer le champ ${field.label || field.key}`}
+                class="p-1 rounded text-slate-400 hover:text-indigo-600 transition cursor-pointer focus-visible:ring-2 focus-visible:ring-indigo-500"
               >
                 <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
@@ -487,12 +485,10 @@
 
               <button
                 type="button"
-                onclick={(e) => {
-                  e.stopPropagation();
-                  removeField(index);
-                }}
+                onclick={() => removeField(index)}
                 title="Supprimer ce champ"
-                class="p-1 rounded text-slate-400 hover:text-rose-600 transition"
+                aria-label={`Supprimer le champ ${field.label || field.key}`}
+                class="p-1 rounded text-slate-400 hover:text-rose-600 transition cursor-pointer focus-visible:ring-2 focus-visible:ring-rose-500"
               >
                 <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
@@ -502,12 +498,12 @@
               <!-- Chevron pour déplier / replier -->
               <button
                 type="button"
-                onclick={(e) => {
-                  e.stopPropagation();
-                  toggleFieldExpanded(field.id);
-                }}
+                onclick={() => toggleFieldExpanded(field.id)}
+                aria-expanded={isExpanded}
+                aria-controls={`field-panel-${field.id}`}
                 title={isExpanded ? 'Replier ce champ' : 'Déplier ce champ'}
-                class="p-1 rounded text-slate-400 hover:text-indigo-600 ml-1 transition"
+                aria-label={isExpanded ? `Replier le champ ${field.label || field.key}` : `Déplier le champ ${field.label || field.key}`}
+                class="p-1 rounded text-slate-400 hover:text-indigo-600 ml-1 transition cursor-pointer focus-visible:ring-2 focus-visible:ring-indigo-500"
               >
                 <svg class="w-4 h-4 transition-transform {isExpanded ? 'rotate-180' : ''}" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
@@ -518,13 +514,22 @@
 
           <!-- Contenu de configuration déplié (Avec Onglets Éditorial vs Technique) -->
           {#if isExpanded}
-            <div class="px-5 pb-5 pt-1 border-t border-slate-100 dark:border-slate-800 space-y-4 animate-in fade-in">
+            <div
+              id={`field-panel-${field.id}`}
+              role="region"
+              aria-labelledby={`field-btn-${field.id}`}
+              class="px-5 pb-5 pt-1 border-t border-slate-100 dark:border-slate-800 space-y-4 animate-in fade-in"
+            >
               <!-- Système d'onglets pour alléger la charge mentale -->
-              <div class="flex items-center gap-1 p-1 bg-slate-100 dark:bg-slate-800 rounded-xl text-xs font-semibold max-w-sm">
+              <div class="flex items-center gap-1 p-1 bg-slate-100 dark:bg-slate-800 rounded-xl text-xs font-semibold max-w-sm" role="tablist" aria-label="Sections de configuration du champ">
                 <button
                   type="button"
+                  role="tab"
+                  id={`tab-editorial-${field.id}`}
+                  aria-selected={currentTab === 'editorial'}
+                  aria-controls={`tabpanel-editorial-${field.id}`}
                   onclick={() => setFieldTab(field.id, 'editorial')}
-                  class="flex-1 py-1.5 rounded-lg text-center flex items-center justify-center gap-1.5 transition
+                  class="flex-1 py-1.5 rounded-lg text-center flex items-center justify-center gap-1.5 transition cursor-pointer focus-visible:ring-2 focus-visible:ring-indigo-500
                     {currentTab === 'editorial'
                       ? 'bg-white dark:bg-slate-900 text-indigo-600 dark:text-indigo-400 shadow-2xs font-bold'
                       : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'}"
@@ -535,8 +540,12 @@
 
                 <button
                   type="button"
+                  role="tab"
+                  id={`tab-technical-${field.id}`}
+                  aria-selected={currentTab === 'technical'}
+                  aria-controls={`tabpanel-technical-${field.id}`}
                   onclick={() => setFieldTab(field.id, 'technical')}
-                  class="flex-1 py-1.5 rounded-lg text-center flex items-center justify-center gap-1.5 transition
+                  class="flex-1 py-1.5 rounded-lg text-center flex items-center justify-center gap-1.5 transition cursor-pointer focus-visible:ring-2 focus-visible:ring-indigo-500
                     {currentTab === 'technical'
                       ? 'bg-white dark:bg-slate-900 text-indigo-600 dark:text-indigo-400 shadow-2xs font-bold'
                       : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'}"
@@ -548,10 +557,15 @@
 
               <!-- ONGLET 1 : ÉDITORIAL (Simple et calme, 2 inputs seulement) -->
               {#if currentTab === 'editorial'}
-                <div class="space-y-3.5 pt-1 animate-in fade-in">
+                <div
+                  id={`tabpanel-editorial-${field.id}`}
+                  role="tabpanel"
+                  aria-labelledby={`tab-editorial-${field.id}`}
+                  class="space-y-3.5 pt-1 animate-in fade-in"
+                >
                   <div>
                     <label for={`field-label-${field.id}`} class="block text-xs font-bold text-slate-800 dark:text-slate-200 mb-1">
-                      Libellé affiché à l'utilisateur <span class="text-rose-500">*</span>
+                      Libellé affiché à l'utilisateur <span class="text-rose-500 font-bold" aria-hidden="true">*</span><span class="sr-only"> (obligatoire)</span>
                     </label>
                     <input
                       id={`field-label-${field.id}`}
@@ -559,6 +573,7 @@
                       bind:value={field.label}
                       onblur={() => handleLabelBlur(field)}
                       placeholder="Ex: Titre de l'article, Résumé, Catégorie..."
+                      aria-required="true"
                       class="w-full px-3.5 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-950 text-xs font-semibold text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-indigo-500"
                     />
                     <p class="text-[11px] text-slate-400 mt-1">
@@ -586,12 +601,17 @@
 
               <!-- ONGLET 2 : TECHNIQUE & RÈGLES (Configuré avec FieldTypePicker et contraintes) -->
               {:else}
-                <div class="space-y-4 pt-1 animate-in fade-in">
+                <div
+                  id={`tabpanel-technical-${field.id}`}
+                  role="tabpanel"
+                  aria-labelledby={`tab-technical-${field.id}`}
+                  class="space-y-4 pt-1 animate-in fade-in"
+                >
                   <!-- Ligne 1 : Clé CSV & Sélecteur de type visuel avec emojis -->
                   <div class="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
                     <div>
                       <label for={`field-key-${field.id}`} class="block text-xs font-bold text-slate-800 dark:text-slate-200 mb-1">
-                        Clé colonne CSV <span class="text-rose-500">*</span>
+                        Clé colonne CSV <span class="text-rose-500 font-bold" aria-hidden="true">*</span><span class="sr-only"> (obligatoire)</span>
                       </label>
                       <input
                         id={`field-key-${field.id}`}
@@ -599,6 +619,7 @@
                         bind:value={field.key}
                         onblur={saveCurrent}
                         placeholder="Ex: title, seo_description, category..."
+                        aria-required="true"
                         class="w-full px-3.5 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-950 font-mono text-xs font-bold text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-indigo-500"
                       />
                       <p class="text-[11px] text-slate-400 mt-1">

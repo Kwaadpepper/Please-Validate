@@ -84,36 +84,44 @@
       role="listbox"
     >
       <!-- Onglets de filtrage par famille de données -->
-      <div class="flex items-center gap-1 p-1 bg-slate-100 dark:bg-slate-800 rounded-xl mb-2 text-[11px] font-medium text-slate-600 dark:text-slate-300">
+      <div class="flex items-center gap-1 p-1 bg-slate-100 dark:bg-slate-800 rounded-xl mb-2 text-[11px] font-medium text-slate-600 dark:text-slate-300" role="tablist" aria-label="Filtrer les types par catégorie">
         <button
           type="button"
+          role="tab"
+          aria-selected={activeCategory === 'all'}
           onclick={() => (activeCategory = 'all')}
-          class="flex-1 py-1 rounded-lg text-center transition
-            {activeCategory === 'all' ? 'bg-white dark:bg-slate-900 font-bold text-indigo-600 dark:text-indigo-400 shadow-2xs' : 'hover:text-slate-900'}"
+          class="flex-1 py-1 rounded-lg text-center transition cursor-pointer focus-visible:ring-2 focus-visible:ring-indigo-500
+            {activeCategory === 'all' ? 'bg-white dark:bg-slate-900 font-bold text-indigo-600 dark:text-indigo-400 shadow-2xs' : 'hover:text-slate-900 dark:hover:text-white'}"
         >
           Tous
         </button>
         <button
           type="button"
+          role="tab"
+          aria-selected={activeCategory === 'text'}
           onclick={() => (activeCategory = 'text')}
-          class="flex-1 py-1 rounded-lg text-center transition
-            {activeCategory === 'text' ? 'bg-white dark:bg-slate-900 font-bold text-indigo-600 dark:text-indigo-400 shadow-2xs' : 'hover:text-slate-900'}"
+          class="flex-1 py-1 rounded-lg text-center transition cursor-pointer focus-visible:ring-2 focus-visible:ring-indigo-500
+            {activeCategory === 'text' ? 'bg-white dark:bg-slate-900 font-bold text-indigo-600 dark:text-indigo-400 shadow-2xs' : 'hover:text-slate-900 dark:hover:text-white'}"
         >
           ✍️ Texte
         </button>
         <button
           type="button"
+          role="tab"
+          aria-selected={activeCategory === 'choice'}
           onclick={() => (activeCategory = 'choice')}
-          class="flex-1 py-1 rounded-lg text-center transition
-            {activeCategory === 'choice' ? 'bg-white dark:bg-slate-900 font-bold text-indigo-600 dark:text-indigo-400 shadow-2xs' : 'hover:text-slate-900'}"
+          class="flex-1 py-1 rounded-lg text-center transition cursor-pointer focus-visible:ring-2 focus-visible:ring-indigo-500
+            {activeCategory === 'choice' ? 'bg-white dark:bg-slate-900 font-bold text-indigo-600 dark:text-indigo-400 shadow-2xs' : 'hover:text-slate-900 dark:hover:text-white'}"
         >
           🔘 Choix
         </button>
         <button
           type="button"
+          role="tab"
+          aria-selected={activeCategory === 'advanced'}
           onclick={() => (activeCategory = 'advanced')}
-          class="flex-1 py-1 rounded-lg text-center transition
-            {activeCategory === 'advanced' ? 'bg-white dark:bg-slate-900 font-bold text-indigo-600 dark:text-indigo-400 shadow-2xs' : 'hover:text-slate-900'}"
+          class="flex-1 py-1 rounded-lg text-center transition cursor-pointer focus-visible:ring-2 focus-visible:ring-indigo-500
+            {activeCategory === 'advanced' ? 'bg-white dark:bg-slate-900 font-bold text-indigo-600 dark:text-indigo-400 shadow-2xs' : 'hover:text-slate-900 dark:hover:text-white'}"
         >
           ⚙️ Spécial
         </button>
@@ -129,7 +137,7 @@
             role="option"
             aria-selected={isSelected}
             onclick={() => handleSelect(type)}
-            class="w-full text-left p-2.5 rounded-xl transition flex items-start justify-between gap-2.5
+            class="w-full text-left p-2.5 rounded-xl transition flex items-start justify-between gap-2.5 cursor-pointer focus-visible:ring-2 focus-visible:ring-indigo-500
               {isSelected
                 ? 'bg-indigo-50/80 dark:bg-indigo-950/50 border border-indigo-200 dark:border-indigo-800'
                 : 'hover:bg-slate-50 dark:hover:bg-slate-800/70 border border-transparent'}"
