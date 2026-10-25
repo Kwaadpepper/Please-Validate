@@ -48,3 +48,25 @@ npm run build
 ```
 
 Le fichier `dist/index.html` généré est immédiatement diffusable par email, hébergeable sur n'importe quel serveur statique (Nginx, S3, GitHub Pages) ou ouvrable directement en double-cliquant dessus en local !
+
+---
+
+## 🐳 Déploiement Docker
+
+Une image multi-stage légère basée sur Nginx Alpine est fournie :
+
+### Avec Docker CLI
+```bash
+# Construire l'image
+docker build -t please-validate .
+
+# Lancer le conteneur sur le port 8080
+docker run -d -p 8080:80 --name please-validate please-validate
+```
+
+### Avec Docker Compose
+```bash
+docker compose up -d
+```
+
+L'application est ensuite directement accessible sur [http://localhost:8080](http://localhost:8080).

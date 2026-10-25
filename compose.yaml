@@ -1,0 +1,10 @@
+services:
+  please-validate:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: please-validate:latest
+    container_name: please-validate
+    ports:
+      - "8080:80"
+    restart: unless-stopped
