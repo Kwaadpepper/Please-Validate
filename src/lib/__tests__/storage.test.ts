@@ -42,3 +42,25 @@ describe('Storage and Template management', () => {
     expect(appState.templatesLibrary.length).toBe(1);
   });
 });
+
+describe('Smart duplicate title generation', () => {
+  it('appends (copie) to clean title', async () => {
+    const { getNextDuplicateTitle } = await import('../storage.svelte');
+    expect(getNextDuplicateTitle('Mon Titre')).toBe('Mon Titre (copie)');
+  });
+
+  it('increments (copie) to (copie 2)', async () => {
+    const { getNextDuplicateTitle } = await import('../storage.svelte');
+    expect(getNextDuplicateTitle('Mon Titre (copie)')).toBe('Mon Titre (copie 2)');
+  });
+
+  it('increments (copie 2) to (copie 3)', async () => {
+    const { getNextDuplicateTitle } = await import('../storage.svelte');
+    expect(getNextDuplicateTitle('Mon Titre (copie 2)')).toBe('Mon Titre (copie 3)');
+  });
+
+  it('cleans up stacked (copie) (copie) properly', async () => {
+    const { getNextDuplicateTitle } = await import('../storage.svelte');
+    expect(getNextDuplicateTitle('Mon Titre (copie) (copie)')).toBe('Mon Titre (copie 2)');
+  });
+});

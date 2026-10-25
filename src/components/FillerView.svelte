@@ -159,7 +159,8 @@
             type="button"
             onclick={() => appState.addRow()}
             title="Ajouter une nouvelle ligne"
-            class="h-8 px-3 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-semibold flex items-center gap-1.5 shadow-2xs transition"
+            aria-label="Ajouter une nouvelle ligne"
+            class="h-8 px-3 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-semibold flex items-center gap-1.5 shadow-2xs transition cursor-pointer focus-visible:ring-2 focus-visible:ring-indigo-500"
           >
             <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
@@ -172,9 +173,11 @@
         <div class="space-y-2">
           <div class="relative">
             <input
+              id="search-entries-input"
               type="text"
               bind:value={appState.searchTerm}
               placeholder="Rechercher dans les entrées..."
+              aria-label="Rechercher dans les entrées"
               class="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl pl-8 pr-7 py-1.5 text-xs text-slate-800 dark:text-slate-200 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 transition"
             />
             <svg class="w-3.5 h-3.5 text-slate-400 absolute left-2.5 top-2.5 pointer-events-none" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -184,8 +187,9 @@
               <button
                 type="button"
                 onclick={() => (appState.searchTerm = '')}
-                class="absolute right-2 top-2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 text-xs font-bold"
+                class="absolute right-2 top-2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 text-xs font-bold cursor-pointer"
                 title="Effacer la recherche"
+                aria-label="Effacer la recherche"
               >
                 ×
               </button>
@@ -193,11 +197,13 @@
           </div>
 
           <!-- Filtres compacts (Segmented) -->
-          <div class="grid grid-cols-3 gap-1 bg-slate-100 dark:bg-slate-800 p-1 rounded-xl text-[11px]">
+          <div class="grid grid-cols-3 gap-1 bg-slate-100 dark:bg-slate-800 p-1 rounded-xl text-[11px]" role="radiogroup" aria-label="Filtrer les entrées">
             <button
               type="button"
+              role="radio"
+              aria-checked={appState.filterStatus === 'all'}
               onclick={() => (appState.filterStatus = 'all')}
-              class="py-1 rounded-lg font-medium transition text-center
+              class="py-1 rounded-lg font-medium transition text-center cursor-pointer focus-visible:ring-2 focus-visible:ring-indigo-500
                 {appState.filterStatus === 'all'
                   ? 'bg-white dark:bg-slate-900 text-slate-900 dark:text-white shadow-2xs font-bold'
                   : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'}"
@@ -206,8 +212,10 @@
             </button>
             <button
               type="button"
+              role="radio"
+              aria-checked={appState.filterStatus === 'invalid'}
               onclick={() => (appState.filterStatus = 'invalid')}
-              class="py-1 rounded-lg font-medium transition text-center flex items-center justify-center gap-1
+              class="py-1 rounded-lg font-medium transition text-center flex items-center justify-center gap-1 cursor-pointer focus-visible:ring-2 focus-visible:ring-indigo-500
                 {appState.filterStatus === 'invalid'
                   ? 'bg-white dark:bg-slate-900 text-amber-600 dark:text-amber-400 shadow-2xs font-bold'
                   : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'}"
@@ -219,14 +227,16 @@
             </button>
             <button
               type="button"
+              role="radio"
+              aria-checked={appState.filterStatus === 'valid'}
               onclick={() => (appState.filterStatus = 'valid')}
-              class="py-1 rounded-lg font-medium transition text-center flex items-center justify-center gap-1
+              class="py-1 rounded-lg font-medium transition text-center flex items-center justify-center gap-1 cursor-pointer focus-visible:ring-2 focus-visible:ring-indigo-500
                 {appState.filterStatus === 'valid'
                   ? 'bg-white dark:bg-slate-900 text-emerald-600 dark:text-emerald-400 shadow-2xs font-bold'
                   : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'}"
             >
               <span>Valides</span>
-              <span class="text-[10px] text-emerald-600 font-bold">({appState.validation.totalValid})</span>
+              <span class="text-[10px] text-emerald-600 dark:text-emerald-400 font-bold">({appState.validation.totalValid})</span>
             </button>
           </div>
         </div>
@@ -242,7 +252,7 @@
                   appState.filterStatus = 'all';
                   appState.searchTerm = '';
                 }}
-                class="text-indigo-600 underline font-medium"
+                class="text-indigo-600 dark:text-indigo-400 underline font-medium cursor-pointer"
               >
                 Réinitialiser les filtres
               </button>
@@ -258,9 +268,16 @@
             <div
               role="button"
               tabindex="0"
+              aria-label={`Entrée #${rowIndex}: ${getRowPrimaryTitle(row)}`}
+              aria-current={isSelected ? 'true' : undefined}
               onclick={() => (appState.selectedRowId = row._id)}
-              onkeydown={(e) => e.key === 'Enter' && (appState.selectedRowId = row._id)}
-              class="group p-2.5 rounded-xl border text-left transition relative cursor-pointer
+              onkeydown={(e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                  e.preventDefault();
+                  appState.selectedRowId = row._id;
+                }
+              }}
+              class="group p-2.5 rounded-xl border text-left transition relative cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500
                 {isSelected
                   ? 'bg-indigo-50/70 dark:bg-indigo-950/40 border-indigo-500 dark:border-indigo-500 ring-2 ring-indigo-500/20 shadow-xs'
                   : 'bg-white dark:bg-slate-900 border-slate-200/80 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700'}"
@@ -303,7 +320,8 @@
                     appState.duplicateRow(row._id);
                   }}
                   title="Dupliquer cette entrée"
-                  class="p-1 text-slate-400 hover:text-indigo-600 rounded transition"
+                  aria-label={`Dupliquer l'entrée #${rowIndex}`}
+                  class="p-1 text-slate-400 hover:text-indigo-600 rounded transition cursor-pointer"
                 >
                   <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
@@ -316,7 +334,8 @@
                     appState.deleteRow(row._id);
                   }}
                   title="Supprimer cette entrée"
-                  class="p-1 text-slate-400 hover:text-rose-600 rounded transition"
+                  aria-label={`Supprimer l'entrée #${rowIndex}`}
+                  class="p-1 text-slate-400 hover:text-rose-600 rounded transition cursor-pointer"
                 >
                   <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
@@ -334,7 +353,7 @@
             type="button"
             onclick={() => (isCsvExportOpen = true)}
             title="Exporter l'ensemble des données au format CSV compatible CMS"
-            class="w-full h-9 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-semibold flex items-center justify-center gap-1.5 shadow-xs transition"
+            class="w-full h-9 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-semibold flex items-center justify-center gap-1.5 shadow-xs transition cursor-pointer focus-visible:ring-2 focus-visible:ring-emerald-500"
           >
             <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
@@ -351,7 +370,7 @@
               type="button"
               onclick={() => csvFileInputEl?.click()}
               title="Importer un fichier CSV existant"
-              class="flex-1 h-8 px-2.5 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 rounded-xl text-xs font-medium flex items-center justify-center gap-1.5 transition"
+              class="flex-1 h-8 px-2.5 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 rounded-xl text-xs font-medium flex items-center justify-center gap-1.5 transition cursor-pointer focus-visible:ring-2 focus-visible:ring-indigo-500"
             >
               <svg class="w-3.5 h-3.5 text-slate-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
@@ -371,7 +390,7 @@
                 type="button"
                 onclick={() => (appState.isImportReportModalOpen = true)}
                 title="Consulter le rapport d'importation CSV"
-                class="h-8 px-2.5 rounded-xl border border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800 text-xs font-medium flex items-center gap-1 transition"
+                class="h-8 px-2.5 rounded-xl border border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800 text-xs font-medium flex items-center gap-1 transition cursor-pointer focus-visible:ring-2 focus-visible:ring-indigo-500"
               >
                 <svg class="w-3.5 h-3.5 text-slate-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
@@ -387,7 +406,7 @@
               type="button"
               onclick={handleConfirmClear}
               title="Vider toutes les lignes"
-              class="h-8 w-8 rounded-xl text-slate-400 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/40 flex items-center justify-center transition shrink-0"
+              class="h-8 w-8 rounded-xl text-slate-400 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/40 flex items-center justify-center transition shrink-0 cursor-pointer focus-visible:ring-2 focus-visible:ring-rose-500"
               aria-label="Vider toutes les lignes"
             >
               <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -410,12 +429,12 @@
           <!-- 1. En-tête de l'éditeur avec Paging, Statut et Actions -->
           <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 border-b border-slate-100 dark:border-slate-800">
             <!-- Gauche : Titre et conformité globale -->
-            <div class="flex items-center gap-3">
+            <div class="flex items-center gap-3 min-w-0 flex-1">
               <span class="px-2.5 py-1 rounded-lg bg-indigo-50 dark:bg-indigo-950/60 text-indigo-700 dark:text-indigo-300 font-mono text-xs font-bold shrink-0">
                 Ligne #{selectedIdx}
               </span>
-              <div class="min-w-0">
-                <h1 class="text-base font-extrabold text-slate-900 dark:text-white tracking-tight truncate">
+              <div class="min-w-0 flex-1">
+                <h1 class="text-base font-extrabold text-slate-900 dark:text-white tracking-tight truncate" title={getRowPrimaryTitle(appState.selectedRow)}>
                   {getRowPrimaryTitle(appState.selectedRow)}
                 </h1>
                 <div class="flex items-center gap-2 mt-0.5">
@@ -439,7 +458,7 @@
             </div>
 
             <!-- Droite : Navigation rapide entre lignes & actions -->
-            <div class="flex items-center gap-1.5 shrink-0 self-end sm:self-center">
+            <div class="flex items-center gap-1.5 shrink-0 self-start sm:self-center">
               <!-- Paging Précédent / Suivant -->
               <div class="flex items-center bg-slate-100 dark:bg-slate-800 rounded-xl p-0.5 text-xs font-medium">
                 <button
@@ -447,7 +466,8 @@
                   disabled={!appState.canSelectPreviousRow}
                   onclick={() => appState.selectPreviousRow()}
                   title="Ligne précédente"
-                  class="p-1.5 rounded-lg hover:bg-white dark:hover:bg-slate-700 disabled:opacity-30 disabled:hover:bg-transparent transition text-slate-700 dark:text-slate-300"
+                  aria-label="Ligne précédente"
+                  class="p-1.5 rounded-lg hover:bg-white dark:hover:bg-slate-700 disabled:opacity-30 disabled:hover:bg-transparent transition text-slate-700 dark:text-slate-300 cursor-pointer disabled:cursor-not-allowed focus-visible:ring-2 focus-visible:ring-indigo-500"
                 >
                   <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
@@ -461,7 +481,8 @@
                   disabled={!appState.canSelectNextRow}
                   onclick={() => appState.selectNextRow()}
                   title="Ligne suivante"
-                  class="p-1.5 rounded-lg hover:bg-white dark:hover:bg-slate-700 disabled:opacity-30 disabled:hover:bg-transparent transition text-slate-700 dark:text-slate-300"
+                  aria-label="Ligne suivante"
+                  class="p-1.5 rounded-lg hover:bg-white dark:hover:bg-slate-700 disabled:opacity-30 disabled:hover:bg-transparent transition text-slate-700 dark:text-slate-300 cursor-pointer disabled:cursor-not-allowed focus-visible:ring-2 focus-visible:ring-indigo-500"
                 >
                   <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
@@ -474,7 +495,8 @@
                 type="button"
                 onclick={() => appState.duplicateRow(appState.selectedRow!._id)}
                 title="Dupliquer cette ligne"
-                class="h-8 px-2.5 rounded-xl border border-slate-200 dark:border-slate-700 text-xs text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 font-medium flex items-center gap-1 transition"
+                aria-label="Dupliquer cette ligne"
+                class="h-8 px-2.5 rounded-xl border border-slate-200 dark:border-slate-700 text-xs text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 font-medium flex items-center gap-1 transition cursor-pointer focus-visible:ring-2 focus-visible:ring-indigo-500"
               >
                 <svg class="w-3.5 h-3.5 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
@@ -487,7 +509,8 @@
                 type="button"
                 onclick={() => appState.deleteRow(appState.selectedRow!._id)}
                 title="Supprimer cette ligne"
-                class="h-8 px-2.5 rounded-xl border border-slate-200 dark:border-slate-700 text-xs text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/40 font-medium flex items-center gap-1 transition"
+                aria-label="Supprimer cette ligne"
+                class="h-8 px-2.5 rounded-xl border border-slate-200 dark:border-slate-700 text-xs text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/40 font-medium flex items-center gap-1 transition cursor-pointer focus-visible:ring-2 focus-visible:ring-rose-500"
               >
                 <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
@@ -511,12 +534,13 @@
                     <span>{FIELD_TYPE_METAS[titleField.type]?.emoji || '📝'}</span>
                     <span>{titleField.label}</span>
                     {#if titleField.rules.required}
-                      <span class="text-rose-500 font-bold" title="Obligatoire">*</span>
+                      <span class="text-rose-500 font-bold" aria-hidden="true">*</span>
+                      <span class="sr-only"> (obligatoire)</span>
                     {/if}
                   </label>
 
                   {#if titleField.rules.min !== undefined || titleField.rules.max !== undefined}
-                    <span class="text-[11px] font-mono {titleLen < (titleField.rules.min ?? 0) ? (titleLen > 0 ? 'text-amber-600 font-semibold' : 'text-slate-400') : titleField.rules.max && titleLen > titleField.rules.max ? 'text-rose-600 font-semibold' : 'text-emerald-600 font-semibold'}">
+                    <span class="text-[11px] font-mono {titleLen < (titleField.rules.min ?? 0) ? (titleLen > 0 ? 'text-amber-600 dark:text-amber-400 font-semibold' : 'text-slate-400') : titleField.rules.max && titleLen > titleField.rules.max ? 'text-rose-600 dark:text-rose-400 font-semibold' : 'text-emerald-600 dark:text-emerald-400 font-semibold'}">
                       {titleLen} {titleField.rules.min !== undefined ? `/ min ${titleField.rules.min}` : ''} {titleField.rules.max !== undefined ? `(max ${titleField.rules.max})` : ''}
                     </span>
                   {/if}
@@ -532,13 +556,16 @@
                   }}
                   onblur={() => markFieldTouched(titleField.key)}
                   placeholder={titleField.helpText || `Ex: Comment bien rédiger vos contenus...`}
+                  aria-required={titleField.rules.required ? 'true' : undefined}
+                  aria-invalid={isTitleErrorShown ? 'true' : 'false'}
+                  aria-describedby={isTitleErrorShown ? `error-${titleField.id}${titleField.helpText ? ` help-${titleField.id}` : ''}` : (titleField.helpText ? `help-${titleField.id}` : undefined)}
                   class="w-full px-4 py-2.5 rounded-xl border text-base font-semibold bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 transition focus:outline-none focus:ring-2 focus:ring-indigo-500
                     {isTitleErrorShown ? 'border-rose-400 focus:ring-rose-400 bg-rose-50/20' : 'border-slate-300 dark:border-slate-700'}"
                 />
 
                 {#if isTitleErrorShown}
-                  <p class="text-xs text-rose-600 dark:text-rose-400 font-medium animate-in fade-in flex items-center gap-1">
-                    <span>⚠</span>
+                  <p id={`error-${titleField.id}`} role="alert" class="text-xs text-rose-600 dark:text-rose-400 font-medium animate-in fade-in flex items-center gap-1">
+                    <span aria-hidden="true">⚠</span>
                     <span>{titleError}</span>
                   </p>
                 {/if}
@@ -546,14 +573,24 @@
                 <!-- Slug URL auto-généré sous le titre -->
                 {#if slugField}
                   {@const slugVal = String(appState.selectedRow[slugField.key] || '')}
-                  <div class="flex items-center gap-2 p-2 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200/80 dark:border-slate-800 text-xs font-mono text-slate-600 dark:text-slate-400">
+                  <div class="flex items-center gap-2 p-2 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200/80 dark:border-slate-800 text-xs font-mono text-slate-600 dark:text-slate-400 min-w-0 overflow-hidden">
                     <span class="text-slate-400 font-sans font-medium text-[11px] shrink-0 flex items-center gap-1">
                       <svg class="w-3.5 h-3.5 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
                       </svg>
                       <span>URL :</span>
                     </span>
-                    <span class="text-slate-400 truncate">https://monsite.fr/</span>
+                    <span class="text-slate-400 shrink-0 font-sans">https://monsite.fr/</span>
+                    <span class="font-bold text-indigo-600 dark:text-indigo-400 truncate min-w-0" title={slugVal}>
+                      {slugVal || 'mon-slug'}
+                    </span>
+                    <span class="ml-auto text-[10px] font-sans text-slate-400 shrink-0 hidden sm:inline">
+                      (auto-dérivé)
+                    </span>
+                  </div>
+                {/if}
+              </div>
+            {/if}
                     <span class="font-bold text-indigo-600 dark:text-indigo-400 truncate">
                       {slugVal || 'mon-slug'}
                     </span>

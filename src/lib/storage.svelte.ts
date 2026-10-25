@@ -16,6 +16,19 @@ export interface CsvImportReport {
   totalInvalid: number;
 }
 
+export function getNextDuplicateTitle(original: string): string {
+  if (!original) return '';
+  // Repère si le titre se termine déjà par une ou plusieurs mentions (copie) ou (copie N)
+  const match = original.match(/^(.*?)(?:\s*\(copie(?:\s+(\d+))?\))+$/i);
+  if (match) {
+    const base = match[1].trim();
+    const lastNumberMatch = original.match(/\(copie(?:\s+(\d+))?\)$/i);
+    const count = lastNumberMatch && lastNumberMatch[1] ? parseInt(lastNumberMatch[1], 10) + 1 : 2;
+    return `${base} (copie ${count})`;
+  }
+  return `${original} (copie)`;
+}
+
 class AppState {
   currentTemplate = $state<PleaseTemplate>(DEFAULT_DEMO_TEMPLATE);
   templatesLibrary = $state<PleaseTemplate[]>([DEFAULT_DEMO_TEMPLATE]);
@@ -351,10 +364,10 @@ class AppState {
       _id: 'row_' + Math.random().toString(36).substring(2, 9) + Date.now().toString(36).substring(4)
     };
 
-    // Si on a un titre, ajouter copie
+    // Si on a un champ texte / titre, appliquer l'incrémentation intelligente de copie
     for (const field of this.currentTemplate.fields) {
       if (field.type === 'text' && typeof clone[field.key] === 'string' && clone[field.key]) {
-        clone[field.key] = `${clone[field.key]} (copie)`;
+        clone[field.key] = getNextDuplicateTitle(clone[field.key]);
         break;
       }
     }
