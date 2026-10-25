@@ -8,6 +8,14 @@ import { parseFromCsv } from './csv';
 const STORAGE_TEMPLATES_KEY = 'please_validate_templates_v1';
 const STORAGE_CURRENT_TPL_ID_KEY = 'please_validate_current_tpl_id';
 
+export interface CsvImportReport {
+  rowsCount: number;
+  warnings: string[];
+  matchedHeaders: string[];
+  totalValid: number;
+  totalInvalid: number;
+}
+
 class AppState {
   currentTemplate = $state<PleaseTemplate>(DEFAULT_DEMO_TEMPLATE);
   templatesLibrary = $state<PleaseTemplate[]>([DEFAULT_DEMO_TEMPLATE]);
@@ -18,6 +26,10 @@ class AppState {
   searchTerm = $state<string>('');
   toastMessage = $state<string | null>(null);
   toastType = $state<'info' | 'success' | 'warning' | 'error'>('info');
+
+  // Rapport d'import CSV
+  lastImportReport = $state<CsvImportReport | null>(null);
+  isImportReportModalOpen = $state(false);
 
   private toastTimeout: ReturnType<typeof setTimeout> | null = null;
 
@@ -121,8 +133,18 @@ class AppState {
     if (typeof window === 'undefined') return;
     try {
       const hashStr = encodeTemplateToHash(this.currentTemplate);
-      const newUrl = `${window.location.pathname}#p=${hashStr}`;
-      window.history.replaceState(null, '', newUrl);
+      const isFileProtocol =
+        window.location.protocol === 'file:' ||
+        !window.location.origin ||
+        window.location.origin === 'null';
+
+      if (isFileProtocol) {
+        // En mode file://, modifier uniquement le hash sans toucher à window.location.pathname
+        window.location.hash = `p=${hashStr}`;
+      } else {
+        const newUrl = `${window.location.pathname}#p=${hashStr}`;
+        window.history.replaceState(null, '', newUrl);
+      }
     } catch (e) {
       console.error('Erreur lors de la synchronisation de l’URL:', e);
     }
@@ -139,6 +161,7 @@ class AppState {
   }
 
   private saveLibrary() {
+    if (typeof localStorage === 'undefined') return;
     try {
       localStorage.setItem(STORAGE_TEMPLATES_KEY, JSON.stringify(this.templatesLibrary));
     } catch (e) {
@@ -151,9 +174,11 @@ class AppState {
     this.currentTemplate = template;
     this.upsertTemplateInLibrary(template);
 
-    try {
-      localStorage.setItem(STORAGE_CURRENT_TPL_ID_KEY, template.id);
-    } catch {}
+    if (typeof localStorage !== 'undefined') {
+      try {
+        localStorage.setItem(STORAGE_CURRENT_TPL_ID_KEY, template.id);
+      } catch {}
+    }
 
     if (updateHash) {
       this.syncUrlHash();
@@ -170,6 +195,35 @@ class AppState {
     this.upsertTemplateInLibrary(this.currentTemplate);
     this.syncUrlHash();
     this.showToast('Gabarit enregistré avec succès.', 'success');
+  }
+
+  deleteTemplate(templateId: string) {
+    if (this.templatesLibrary.length <= 1) {
+      this.showToast('Impossible de supprimer le seul gabarit restant.', 'warning');
+      return;
+    }
+
+    const tplToDelete = this.templatesLibrary.find((t) => t.id === templateId);
+    const deletedName = tplToDelete?.name || 'Gabarit';
+
+    // 1. Retirer de la bibliothèque
+    this.templatesLibrary = this.templatesLibrary.filter((t) => t.id !== templateId);
+    this.saveLibrary();
+
+    // 2. Nettoyer les lignes associées du localStorage
+    if (typeof localStorage !== 'undefined') {
+      try {
+        localStorage.removeItem(this.getRowsStorageKey(templateId));
+      } catch {}
+    }
+
+    // 3. Si c'était le gabarit actif, basculer vers le premier disponible
+    if (this.currentTemplate.id === templateId) {
+      const nextTpl = this.templatesLibrary[0];
+      this.selectTemplate(nextTpl);
+    }
+
+    this.showToast(`Gabarit « ${deletedName} » supprimé de la bibliothèque locale.`, 'info');
   }
 
   createNewTemplate(): PleaseTemplate {
@@ -212,17 +266,19 @@ class AppState {
   }
 
   private loadRowsForCurrentTemplate() {
-    try {
-      const saved = localStorage.getItem(this.getRowsStorageKey(this.currentTemplate.id));
-      if (saved) {
-        const parsed = JSON.parse(saved);
-        if (Array.isArray(parsed) && parsed.length > 0) {
-          this.rows = parsed;
-          this.selectedRowId = parsed[0]._id;
-          return;
+    if (typeof localStorage !== 'undefined') {
+      try {
+        const saved = localStorage.getItem(this.getRowsStorageKey(this.currentTemplate.id));
+        if (saved) {
+          const parsed = JSON.parse(saved);
+          if (Array.isArray(parsed) && parsed.length > 0) {
+            this.rows = parsed;
+            this.selectedRowId = parsed[0]._id;
+            return;
+          }
         }
-      }
-    } catch {}
+      } catch {}
+    }
 
     // Par défaut, créer une ligne vierge avec les valeurs par défaut
     this.rows = [this.createBlankRow()];
@@ -230,6 +286,7 @@ class AppState {
   }
 
   saveRowsForCurrentTemplate() {
+    if (typeof localStorage === 'undefined') return;
     try {
       localStorage.setItem(
         this.getRowsStorageKey(this.currentTemplate.id),
@@ -343,7 +400,7 @@ class AppState {
 
   importCsv(csvText: string) {
     try {
-      const { rows: importedRows, warnings } = parseFromCsv(csvText, this.currentTemplate);
+      const { rows: importedRows, warnings, matchedHeaders } = parseFromCsv(csvText, this.currentTemplate);
 
       if (importedRows.length === 0) {
         this.showToast('Aucune ligne valide trouvée dans le CSV.', 'error');
@@ -354,10 +411,21 @@ class AppState {
       this.selectedRowId = importedRows[0]._id;
       this.saveRowsForCurrentTemplate();
 
-      if (warnings.length > 0) {
-        this.showToast(`${importedRows.length} lignes importées avec ${warnings.length} avertissement(s).`, 'warning');
+      const validation = validateAllRows(this.currentTemplate, importedRows);
+
+      this.lastImportReport = {
+        rowsCount: importedRows.length,
+        warnings,
+        matchedHeaders,
+        totalValid: validation.totalValid,
+        totalInvalid: validation.totalInvalid
+      };
+
+      // Si des warnings ou des erreurs existent, ouvrir la modale pour que l'utilisateur voie le détail
+      if (warnings.length > 0 || validation.totalInvalid > 0) {
+        this.isImportReportModalOpen = true;
       } else {
-        this.showToast(`${importedRows.length} lignes importées avec succès !`, 'success');
+        this.showToast(`${importedRows.length} lignes importées avec succès (100% conformes) !`, 'success');
       }
     } catch (e: any) {
       this.showToast(`Erreur d’import CSV : ${e.message}`, 'error');

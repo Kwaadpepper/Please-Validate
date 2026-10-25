@@ -1,6 +1,6 @@
 <script lang="ts">
   import { appState } from '../lib/storage.svelte';
-  import { parsePleaseFile } from '../lib/codec';
+  import { parsePleaseFile, exportPleaseFile } from '../lib/codec';
   import ShareModal from './ShareModal.svelte';
 
   let isShareOpen = $state(false);
@@ -34,12 +34,41 @@
     reader.readAsText(file);
     input.value = '';
   }
+
+  function handleExportTemplate() {
+    try {
+      const { filename, content } = exportPleaseFile(appState.currentTemplate);
+      const blob = new Blob([content], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+      appState.showToast(`Fichier « ${filename} » exporté.`, 'success');
+    } catch (e: any) {
+      appState.showToast(e.message, 'error');
+    }
+  }
+
+  function handleDeleteCurrentTemplate() {
+    if (appState.templatesLibrary.length <= 1) {
+      appState.showToast('Impossible de supprimer l’unique gabarit de la liste.', 'warning');
+      return;
+    }
+    const name = appState.currentTemplate.name;
+    if (confirm(`Voulez-vous vraiment supprimer le gabarit « ${name} » et toutes ses données locales ?`)) {
+      appState.deleteTemplate(appState.currentTemplate.id);
+    }
+  }
 </script>
 
 <header class="bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 sticky top-0 z-30 shadow-xs">
-  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-4">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 min-h-16 py-2 flex flex-wrap items-center justify-between gap-3">
     <!-- Logo & Titre -->
-    <div class="flex items-center gap-3">
+    <div class="flex items-center gap-3 shrink-0">
       <div class="w-9 h-9 rounded-xl bg-gradient-to-tr from-indigo-600 to-violet-500 text-white flex items-center justify-center font-black shadow-md shadow-indigo-500/20 text-lg">
         ✓
       </div>
@@ -54,13 +83,15 @@
       </div>
     </div>
 
-    <!-- Sélecteur de gabarit & Actions gabarit -->
-    <div class="flex items-center gap-2 max-w-md w-full justify-center">
-      <div class="relative flex-1 max-w-xs">
+    <!-- Sélecteur de gabarit large & Actions gabarit -->
+    <div class="flex items-center gap-2 flex-1 max-w-2xl justify-center">
+      <div class="relative flex-1 min-w-[220px] sm:min-w-[320px] md:min-w-[380px]">
         <select
+          id="template-library-select"
+          aria-label="Sélectionner un gabarit dans la bibliothèque"
           value={appState.currentTemplate.id}
           onchange={handleTemplateSelect}
-          class="w-full appearance-none bg-slate-100 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-lg pl-3 pr-8 py-1.5 text-xs font-medium text-slate-800 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+          class="w-full appearance-none bg-slate-100 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-lg pl-3 pr-8 py-1.5 text-xs font-semibold text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-indigo-500 transition"
           title="Sélectionner un gabarit"
         >
           {#each appState.templatesLibrary as tpl}
@@ -76,24 +107,39 @@
         </div>
       </div>
 
+      <!-- Supprimer le gabarit de la liste (localStorage) -->
+      <button
+        type="button"
+        disabled={appState.templatesLibrary.length <= 1}
+        onclick={handleDeleteCurrentTemplate}
+        title={appState.templatesLibrary.length <= 1 ? "Impossible de supprimer l'unique gabarit restant" : `Supprimer le gabarit « ${appState.currentTemplate.name} » de la mémoire`}
+        class="p-1.5 rounded-lg text-slate-400 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/40 disabled:opacity-20 transition"
+        aria-label="Supprimer ce gabarit de la liste"
+      >
+        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+        </svg>
+      </button>
+
+      <!-- Nouveau gabarit -->
       <button
         type="button"
         onclick={() => appState.createNewTemplate()}
-        title="Créer un nouveau gabarit"
-        class="p-1.5 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 rounded-lg text-xs font-semibold flex items-center gap-1 transition"
+        title="Créer un nouveau gabarit vierge"
+        class="p-1.5 sm:px-2.5 sm:py-1.5 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 rounded-lg text-xs font-semibold flex items-center gap-1 transition"
       >
         <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
         </svg>
-        <span class="hidden md:inline">Nouveau</span>
+        <span class="hidden sm:inline">Nouveau</span>
       </button>
 
-      <!-- Import .please -->
+      <!-- Importer .please -->
       <button
         type="button"
         onclick={() => fileInputEl?.click()}
         title="Importer un fichier gabarit .please"
-        class="p-1.5 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 rounded-lg text-xs font-semibold flex items-center gap-1 transition"
+        class="p-1.5 sm:px-2.5 sm:py-1.5 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 rounded-lg text-xs font-semibold flex items-center gap-1 transition"
       >
         <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
@@ -107,6 +153,19 @@
         onchange={handleFileImport}
         class="hidden"
       />
+
+      <!-- Exporter .please -->
+      <button
+        type="button"
+        onclick={handleExportTemplate}
+        title="Télécharger ce gabarit sous forme de fichier portable .please"
+        class="p-1.5 sm:px-2.5 sm:py-1.5 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 rounded-lg text-xs font-semibold flex items-center gap-1 transition"
+      >
+        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+        </svg>
+        <span class="hidden md:inline">Exporter .please</span>
+      </button>
 
       <!-- Partager -->
       <button
@@ -123,7 +182,7 @@
     </div>
 
     <!-- Onglets de navigation -->
-    <nav class="flex items-center gap-1 p-1 bg-slate-100 dark:bg-slate-800 rounded-xl" aria-label="Modes">
+    <nav class="flex items-center gap-1 p-1 bg-slate-100 dark:bg-slate-800 rounded-xl shrink-0" aria-label="Modes">
       <button
         type="button"
         onclick={() => (appState.viewMode = 'filler')}

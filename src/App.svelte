@@ -5,6 +5,7 @@
   import FillerView from './components/FillerView.svelte';
   import BuilderView from './components/BuilderView.svelte';
   import Toast from './components/Toast.svelte';
+  import CsvImportReportModal from './components/CsvImportReportModal.svelte';
 
   onMount(() => {
     appState.init();
@@ -27,4 +28,9 @@
   </footer>
 
   <Toast />
+
+  <CsvImportReportModal
+    isOpen={appState.isImportReportModalOpen}
+    onClose={() => (appState.isImportReportModalOpen = false)}
+  />
 </div>

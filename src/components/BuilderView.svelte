@@ -4,6 +4,8 @@
   import type { FieldDefinition, FieldType, WysiwygFormat } from '../lib/types';
   import { slugify } from '../lib/slug';
 
+  import { exportPleaseFile } from '../lib/codec';
+
   // Copie de travail locale du gabarit
   let templateName = $state(appState.currentTemplate.name);
   let templateDescription = $state(appState.currentTemplate.description || '');
@@ -36,6 +38,35 @@
     saveCurrent();
     if (!nameError) {
       appState.viewMode = 'filler';
+    }
+  }
+
+  function handleExportPlease() {
+    saveCurrent();
+    try {
+      const { filename, content } = exportPleaseFile(appState.currentTemplate);
+      const blob = new Blob([content], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+      appState.showToast(`Fichier « ${filename} » exporté.`, 'success');
+    } catch (e: any) {
+      appState.showToast(e.message, 'error');
+    }
+  }
+
+  function handleDeleteCurrentTemplate() {
+    if (appState.templatesLibrary.length <= 1) {
+      appState.showToast('Impossible de supprimer le seul gabarit restant.', 'warning');
+      return;
+    }
+    if (confirm(`Supprimer définitivement le gabarit « ${appState.currentTemplate.name} » ?`)) {
+      appState.deleteTemplate(appState.currentTemplate.id);
     }
   }
 
@@ -144,7 +175,31 @@
           Définissez les champs, les règles de validation et la structure de l’export CSV.
         </p>
       </div>
-      <div class="flex items-center gap-2">
+      <div class="flex items-center gap-2 flex-wrap">
+        <button
+          type="button"
+          onclick={handleExportPlease}
+          title="Exporter ce gabarit au format portable (.please)"
+          class="px-3.5 py-2 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 rounded-xl text-xs font-semibold flex items-center gap-1.5 transition"
+        >
+          <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+          </svg>
+          <span>Exporter .please</span>
+        </button>
+        {#if appState.templatesLibrary.length > 1}
+          <button
+            type="button"
+            onclick={handleDeleteCurrentTemplate}
+            title="Supprimer ce gabarit de la liste"
+            class="px-3 py-2 bg-rose-50 dark:bg-rose-950/40 hover:bg-rose-100 dark:hover:bg-rose-900/60 text-rose-600 dark:text-rose-300 rounded-xl text-xs font-semibold flex items-center gap-1.5 transition"
+          >
+            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+            </svg>
+            <span>Supprimer</span>
+          </button>
+        {/if}
         <button
           type="button"
           onclick={saveCurrent}

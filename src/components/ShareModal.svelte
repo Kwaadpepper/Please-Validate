@@ -11,11 +11,24 @@
 
   let copied = $state(false);
 
+  let isLocalFile = $derived(
+    typeof window !== 'undefined' &&
+      (window.location.protocol === 'file:' || !window.location.origin || window.location.origin === 'null')
+  );
+
   let shareableUrl = $derived.by(() => {
     if (typeof window === 'undefined') return '';
     try {
       const hash = encodeTemplateToHash(appState.currentTemplate);
-      return `${window.location.origin}${window.location.pathname}#p=${hash}`;
+      if (isLocalFile) {
+        // En protocole file://, window.location.origin vaut "null" dans les navigateurs
+        const cleanBase = window.location.href.split('#')[0];
+        return `${cleanBase}#p=${hash}`;
+      } else {
+        const origin = window.location.origin.replace(/\/$/, '');
+        const path = window.location.pathname.startsWith('/') ? window.location.pathname : `/${window.location.pathname}`;
+        return `${origin}${path}#p=${hash}`;
+      }
     } catch {
       return '';
     }
@@ -83,8 +96,18 @@
 
       <div class="space-y-4 text-sm">
         <p class="text-slate-600 dark:text-slate-400">
-          Ce lien contient la spécification complète de vos champs et règles de validation (versionnée <span class="font-mono bg-slate-100 dark:bg-slate-800 px-1 py-0.5 rounded text-xs">v1</span>). N’importe qui ouvrant ce lien dispose immédiatement de l’interface de saisie sans avoir besoin de compte.
+          Ce lien contient la spécification complète de vos champs et règles de validation (versionnée <span class="font-mono bg-slate-100 dark:bg-slate-800 px-1 py-0.5 rounded text-xs font-bold">v1</span>). N’importe qui ouvrant ce lien dispose immédiatement de l’interface de saisie sans avoir besoin de compte.
         </p>
+
+        <!-- Message d'aide si utilisation en local file:// -->
+        {#if isLocalFile}
+          <div class="p-3 rounded-xl bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-800 text-amber-900 dark:text-amber-200 text-xs space-y-1">
+            <span class="font-bold block">💡 Mode fichier local autonome (file://) :</span>
+            <p>
+              Le lien ci-dessous ouvre directement ce fichier HTML sur votre poste. Pour transmettre ce gabarit à des collaborateurs distants, le plus simple est de leur envoyer le fichier <strong class="font-mono">.please</strong> (bouton ci-dessous) ou d'héberger ce fichier HTML sur un serveur web / intranet.
+            </p>
+          </div>
+        {/if}
 
         <!-- Champ URL -->
         <div class="space-y-1.5">
@@ -108,12 +131,12 @@
                 <svg class="w-4 h-4 text-emerald-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
                 </svg>
-                Copié !
+                <span>Copié !</span>
               {:else}
                 <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3" />
                 </svg>
-                Copier
+                <span>Copier</span>
               {/if}
             </button>
           </div>
@@ -132,7 +155,7 @@
             <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
             </svg>
-            Télécharger .please
+            <span>Télécharger .please</span>
           </button>
         </div>
       </div>
