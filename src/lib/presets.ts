@@ -3,6 +3,7 @@ import type { FieldDefinition, PleaseTemplate } from './types';
 export interface ClassicPreset {
   id: string;
   name: string;
+  emoji: string;
   description: string;
   category: 'seo' | 'content' | 'taxonomy' | 'status';
   createFields: (existingKeys: string[]) => FieldDefinition[];
@@ -26,6 +27,7 @@ export const CLASSIC_PRESETS: ClassicPreset[] = [
   {
     id: 'title_and_slug',
     name: 'Titre & Slug URL',
+    emoji: '📝',
     description: 'Un champ Titre obligatoire et son champ Slug auto-dérivé en lecture seule',
     category: 'content',
     createFields: (existingKeys) => {
@@ -55,6 +57,7 @@ export const CLASSIC_PRESETS: ClassicPreset[] = [
   {
     id: 'seo_title',
     name: 'Titre SEO (Google)',
+    emoji: '🔍',
     description: 'Champ optimisé pour les règles SERP de Google (50 à 60 caractères)',
     category: 'seo',
     createFields: (existingKeys) => [
@@ -71,6 +74,7 @@ export const CLASSIC_PRESETS: ClassicPreset[] = [
   {
     id: 'seo_description',
     name: 'Description SEO (Google)',
+    emoji: '🔍',
     description: 'Meta description optimisée pour le SERP Google (140 à 160 caractères)',
     category: 'seo',
     createFields: (existingKeys) => [
@@ -87,6 +91,7 @@ export const CLASSIC_PRESETS: ClassicPreset[] = [
   {
     id: 'wysiwyg_html',
     name: 'Contenu WYSIWYG (HTML)',
+    emoji: '✨',
     description: 'Éditeur visuel exportant du HTML propre et sémantique',
     category: 'content',
     createFields: (existingKeys) => [
@@ -104,6 +109,7 @@ export const CLASSIC_PRESETS: ClassicPreset[] = [
   {
     id: 'wysiwyg_markdown',
     name: 'Contenu WYSIWYG (Markdown)',
+    emoji: '✨',
     description: 'Éditeur visuel exportant de la syntaxe Markdown',
     category: 'content',
     createFields: (existingKeys) => [
@@ -121,6 +127,7 @@ export const CLASSIC_PRESETS: ClassicPreset[] = [
   {
     id: 'select_category',
     name: 'Catégorie (Select simple)',
+    emoji: '🔽',
     description: 'Menu déroulant à choix unique',
     category: 'taxonomy',
     createFields: (existingKeys) => [
@@ -138,6 +145,7 @@ export const CLASSIC_PRESETS: ClassicPreset[] = [
   {
     id: 'multiselect_tags',
     name: 'Étiquettes / Tags (Select multiple)',
+    emoji: '🏷️',
     description: 'Sélection multiple d’options avec limitation min/max de choix',
     category: 'taxonomy',
     createFields: (existingKeys) => [
@@ -155,6 +163,7 @@ export const CLASSIC_PRESETS: ClassicPreset[] = [
   {
     id: 'status_published',
     name: 'Statut de publication (Booléen)',
+    emoji: '🔘',
     description: 'Case à cocher Oui/Non',
     category: 'status',
     createFields: (existingKeys) => [

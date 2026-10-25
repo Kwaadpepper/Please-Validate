@@ -2,7 +2,7 @@
   import { appState } from '../lib/storage.svelte';
   import WysiwygInput from './WysiwygInput.svelte';
   import CsvExportModal from './CsvExportModal.svelte';
-  import type { FieldDefinition, RowData } from '../lib/types';
+  import { FIELD_TYPE_METAS, type FieldDefinition, type RowData } from '../lib/types';
 
   let isCsvExportOpen = $state(false);
   let csvFileInputEl: HTMLInputElement | null = $state(null);
@@ -507,7 +507,8 @@
 
               <div class="space-y-2">
                 <div class="flex items-center justify-between text-xs">
-                  <label for={`input-${titleField.id}`} class="font-bold text-slate-800 dark:text-slate-200 flex items-center gap-1">
+                  <label for={`input-${titleField.id}`} class="font-bold text-slate-800 dark:text-slate-200 flex items-center gap-1.5">
+                    <span>{FIELD_TYPE_METAS[titleField.type]?.emoji || '📝'}</span>
                     <span>{titleField.label}</span>
                     {#if titleField.rules.required}
                       <span class="text-rose-500 font-bold" title="Obligatoire">*</span>
@@ -577,7 +578,8 @@
 
                   <div class="space-y-1.5 {isSpanFull ? 'md:col-span-2' : ''}">
                     <div class="flex items-center justify-between text-xs">
-                      <label for={`input-${field.id}`} class="font-bold text-slate-800 dark:text-slate-200 flex items-center gap-1">
+                      <label for={`input-${field.id}`} class="font-bold text-slate-800 dark:text-slate-200 flex items-center gap-1.5">
+                        <span>{FIELD_TYPE_METAS[field.type]?.emoji || '📝'}</span>
                         <span>{field.label}</span>
                         {#if isRequired}
                           <span class="text-rose-500 font-bold" title="Obligatoire">*</span>
@@ -731,7 +733,8 @@
 
               <div class="space-y-2 pt-2 border-t border-slate-100 dark:border-slate-800">
                 <div class="flex items-center justify-between text-xs">
-                  <label for={`input-${field.id}`} class="font-bold text-slate-800 dark:text-slate-200 flex items-center gap-1">
+                  <label for={`input-${field.id}`} class="font-bold text-slate-800 dark:text-slate-200 flex items-center gap-1.5">
+                    <span>{FIELD_TYPE_METAS[field.type]?.emoji || '✨'}</span>
                     <span>{field.label}</span>
                     {#if field.rules.required}
                       <span class="text-rose-500 font-bold" title="Obligatoire">*</span>
@@ -805,7 +808,8 @@
 
                     <div class="space-y-1.5">
                       <div class="flex items-center justify-between text-xs">
-                        <label for={`input-${field.id}`} class="font-bold text-slate-800 dark:text-slate-200 flex items-center gap-1">
+                        <label for={`input-${field.id}`} class="font-bold text-slate-800 dark:text-slate-200 flex items-center gap-1.5">
+                          <span>{FIELD_TYPE_METAS[field.type]?.emoji || '🔍'}</span>
                           <span>{field.label}</span>
                           {#if isRequired}
                             <span class="text-rose-500 font-bold" title="Obligatoire">*</span>
