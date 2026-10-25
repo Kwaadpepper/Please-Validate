@@ -46,6 +46,25 @@ class AppState {
       : null
   );
 
+  currentRowIndex = $derived(
+    this.selectedRow ? this.rows.indexOf(this.selectedRow) : 0
+  );
+
+  canSelectPreviousRow = $derived(this.currentRowIndex > 0);
+  canSelectNextRow = $derived(this.currentRowIndex < this.rows.length - 1);
+
+  selectPreviousRow() {
+    if (this.canSelectPreviousRow) {
+      this.selectedRowId = this.rows[this.currentRowIndex - 1]._id;
+    }
+  }
+
+  selectNextRow() {
+    if (this.canSelectNextRow) {
+      this.selectedRowId = this.rows[this.currentRowIndex + 1]._id;
+    }
+  }
+
   filteredRows = $derived.by(() => {
     let list = this.rows;
 
