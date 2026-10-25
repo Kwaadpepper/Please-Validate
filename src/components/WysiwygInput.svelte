@@ -129,13 +129,14 @@
 
 <div class="border border-slate-300 dark:border-slate-700 rounded-xl overflow-hidden bg-white dark:bg-slate-900 transition-colors focus-within:ring-2 focus-within:ring-indigo-500/50">
   <!-- Barre d'outils -->
-  <div class="flex flex-wrap items-center justify-between gap-1 p-1.5 bg-slate-50 dark:bg-slate-800/60 border-b border-slate-200 dark:border-slate-800 text-xs text-slate-700 dark:text-slate-300">
+  <div class="flex flex-wrap items-center justify-between gap-1 p-1.5 bg-slate-50 dark:bg-slate-800/60 border-b border-slate-200 dark:border-slate-800 text-xs text-slate-700 dark:text-slate-300" role="toolbar" aria-label="Formatage du texte">
     <div class="flex items-center gap-1 flex-wrap">
       <button
         type="button"
         onclick={() => handleInsert('bold')}
         title="Gras"
-        class="p-1.5 rounded hover:bg-slate-200 dark:hover:bg-slate-700 font-bold w-7 h-7 flex items-center justify-center transition"
+        aria-label="Mettre en gras"
+        class="p-1.5 rounded hover:bg-slate-200 dark:hover:bg-slate-700 font-bold w-7 h-7 flex items-center justify-center transition cursor-pointer focus-visible:ring-2 focus-visible:ring-indigo-500"
       >
         B
       </button>
@@ -143,7 +144,8 @@
         type="button"
         onclick={() => handleInsert('italic')}
         title="Italique"
-        class="p-1.5 rounded hover:bg-slate-200 dark:hover:bg-slate-700 italic w-7 h-7 flex items-center justify-center transition"
+        aria-label="Mettre en italique"
+        class="p-1.5 rounded hover:bg-slate-200 dark:hover:bg-slate-700 italic w-7 h-7 flex items-center justify-center transition cursor-pointer focus-visible:ring-2 focus-visible:ring-indigo-500"
       >
         I
       </button>
@@ -154,7 +156,8 @@
         type="button"
         onclick={() => handleInsert('h2')}
         title="Titre H2"
-        class="p-1.5 rounded hover:bg-slate-200 dark:hover:bg-slate-700 font-bold text-[11px] h-7 px-2 flex items-center justify-center transition"
+        aria-label="Titre niveau 2"
+        class="p-1.5 rounded hover:bg-slate-200 dark:hover:bg-slate-700 font-bold text-[11px] h-7 px-2 flex items-center justify-center transition cursor-pointer focus-visible:ring-2 focus-visible:ring-indigo-500"
       >
         H2
       </button>
@@ -162,7 +165,8 @@
         type="button"
         onclick={() => handleInsert('h3')}
         title="Titre H3"
-        class="p-1.5 rounded hover:bg-slate-200 dark:hover:bg-slate-700 font-bold text-[11px] h-7 px-2 flex items-center justify-center transition"
+        aria-label="Titre niveau 3"
+        class="p-1.5 rounded hover:bg-slate-200 dark:hover:bg-slate-700 font-bold text-[11px] h-7 px-2 flex items-center justify-center transition cursor-pointer focus-visible:ring-2 focus-visible:ring-indigo-500"
       >
         H3
       </button>
@@ -173,7 +177,8 @@
         type="button"
         onclick={() => handleInsert('ul')}
         title="Liste à puces"
-        class="p-1.5 rounded hover:bg-slate-200 dark:hover:bg-slate-700 w-7 h-7 flex items-center justify-center transition"
+        aria-label="Liste à puces"
+        class="p-1.5 rounded hover:bg-slate-200 dark:hover:bg-slate-700 w-7 h-7 flex items-center justify-center transition cursor-pointer focus-visible:ring-2 focus-visible:ring-indigo-500"
       >
         <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
@@ -183,7 +188,8 @@
         type="button"
         onclick={() => handleInsert('ol')}
         title="Liste ordonnée"
-        class="p-1.5 rounded hover:bg-slate-200 dark:hover:bg-slate-700 w-7 h-7 flex items-center justify-center text-[10px] font-mono transition"
+        aria-label="Liste ordonnée"
+        class="p-1.5 rounded hover:bg-slate-200 dark:hover:bg-slate-700 w-7 h-7 flex items-center justify-center text-[10px] font-mono transition cursor-pointer focus-visible:ring-2 focus-visible:ring-indigo-500"
       >
         1.
       </button>
@@ -191,7 +197,8 @@
         type="button"
         onclick={() => handleInsert('link')}
         title="Insérer un lien"
-        class="p-1.5 rounded hover:bg-slate-200 dark:hover:bg-slate-700 w-7 h-7 flex items-center justify-center transition"
+        aria-label="Insérer un lien"
+        class="p-1.5 rounded hover:bg-slate-200 dark:hover:bg-slate-700 w-7 h-7 flex items-center justify-center transition cursor-pointer focus-visible:ring-2 focus-visible:ring-indigo-500"
       >
         <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
@@ -207,7 +214,7 @@
       <button
         type="button"
         onclick={() => (isPreview = !isPreview)}
-        class="px-2.5 py-1 rounded bg-slate-200 dark:bg-slate-700 hover:bg-slate-300 dark:hover:bg-slate-600 text-slate-800 dark:text-slate-200 text-xs font-medium transition"
+        class="px-2.5 py-1 rounded bg-slate-200 dark:bg-slate-700 hover:bg-slate-300 dark:hover:bg-slate-600 text-slate-800 dark:text-slate-200 text-xs font-medium transition cursor-pointer focus-visible:ring-2 focus-visible:ring-indigo-500"
       >
         {isPreview ? 'Éditer' : 'Aperçu'}
       </button>
@@ -234,7 +241,7 @@
   <div class="px-3 py-1.5 bg-slate-50 dark:bg-slate-800/40 border-t border-slate-200 dark:border-slate-800 flex items-center justify-between text-xs text-slate-500">
     <div class="flex items-center gap-2">
       <span class="font-medium">
-        Texte brut : <span class={lengthStatus === 'under' ? 'text-amber-600 font-semibold' : lengthStatus === 'over' ? 'text-rose-600 font-semibold' : 'text-emerald-600 font-semibold'}>
+        Texte brut : <span class={lengthStatus === 'under' ? 'text-amber-600 dark:text-amber-400 font-semibold' : lengthStatus === 'over' ? 'text-rose-600 dark:text-rose-400 font-semibold' : 'text-emerald-600 dark:text-emerald-400 font-semibold'}>
           {rawLength}
         </span>
         {#if rules.min !== undefined || rules.max !== undefined}

@@ -609,7 +609,8 @@
                         <span>{FIELD_TYPE_METAS[field.type]?.emoji || '📝'}</span>
                         <span>{field.label}</span>
                         {#if isRequired}
-                          <span class="text-rose-500 font-bold" title="Obligatoire">*</span>
+                          <span class="text-rose-500 font-bold" aria-hidden="true">*</span>
+                          <span class="sr-only"> (obligatoire)</span>
                         {:else if isNullable}
                           <span class="text-slate-400 font-normal text-[11px]">(optionnel)</span>
                         {/if}
@@ -617,7 +618,7 @@
 
                       {#if (field.type === 'text' || field.type === 'textarea') && (field.rules.min !== undefined || field.rules.max !== undefined)}
                         {@const strLen = String(val ?? '').length}
-                        <span class="text-[11px] font-mono {strLen < (field.rules.min ?? 0) ? (strLen > 0 ? 'text-amber-600 font-semibold' : 'text-slate-400') : field.rules.max && strLen > field.rules.max ? 'text-rose-600 font-semibold' : 'text-slate-400'}">
+                        <span class="text-[11px] font-mono {strLen < (field.rules.min ?? 0) ? (strLen > 0 ? 'text-amber-600 dark:text-amber-400 font-semibold' : 'text-slate-400') : field.rules.max && strLen > field.rules.max ? 'text-rose-600 dark:text-rose-400 font-semibold' : 'text-slate-400'}">
                           {strLen} {field.rules.min !== undefined ? `/ min ${field.rules.min}` : ''} {field.rules.max !== undefined ? `(max ${field.rules.max})` : ''}
                         </span>
                       {/if}
@@ -635,6 +636,9 @@
                         }}
                         onblur={() => markFieldTouched(field.key)}
                         placeholder={field.helpText || `Saisissez ${field.label}...`}
+                        aria-required={isRequired ? 'true' : undefined}
+                        aria-invalid={isErrorShown ? 'true' : 'false'}
+                        aria-describedby={isErrorShown ? `error-${field.id}${field.helpText ? ` help-${field.id}` : ''}` : (field.helpText ? `help-${field.id}` : undefined)}
                         class="w-full px-3.5 py-2 rounded-xl border text-xs bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 transition focus:outline-none focus:ring-2 focus:ring-indigo-500
                           {isErrorShown ? 'border-rose-400 focus:ring-rose-400 bg-rose-50/20' : 'border-slate-300 dark:border-slate-700'}"
                       />
@@ -649,6 +653,9 @@
                         onblur={() => markFieldTouched(field.key)}
                         placeholder={field.helpText || `Saisissez ${field.label}...`}
                         rows="3"
+                        aria-required={isRequired ? 'true' : undefined}
+                        aria-invalid={isErrorShown ? 'true' : 'false'}
+                        aria-describedby={isErrorShown ? `error-${field.id}${field.helpText ? ` help-${field.id}` : ''}` : (field.helpText ? `help-${field.id}` : undefined)}
                         class="w-full px-3.5 py-2 rounded-xl border text-xs bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 transition focus:outline-none focus:ring-2 focus:ring-indigo-500
                           {isErrorShown ? 'border-rose-400 focus:ring-rose-400 bg-rose-50/20' : 'border-slate-300 dark:border-slate-700'}"
                       ></textarea>
@@ -663,7 +670,7 @@
                             appState.updateSelectedRowField(field.key, !val);
                             markFieldTouched(field.key);
                           }}
-                          class="w-11 h-6 flex items-center rounded-full p-1 transition-colors cursor-pointer
+                          class="w-11 h-6 flex items-center rounded-full p-1 transition-colors cursor-pointer focus-visible:ring-2 focus-visible:ring-indigo-500
                             {Boolean(val) ? 'bg-indigo-600 justify-end' : 'bg-slate-300 dark:bg-slate-700 justify-start'}"
                         >
                           <div class="w-4 h-4 rounded-full bg-white shadow-xs"></div>
@@ -686,6 +693,9 @@
                         placeholder="0"
                         min={field.rules.min}
                         max={field.rules.max}
+                        aria-required={isRequired ? 'true' : undefined}
+                        aria-invalid={isErrorShown ? 'true' : 'false'}
+                        aria-describedby={isErrorShown ? `error-${field.id}${field.helpText ? ` help-${field.id}` : ''}` : (field.helpText ? `help-${field.id}` : undefined)}
                         class="w-full px-3.5 py-2 rounded-xl border text-xs font-mono bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 transition focus:outline-none focus:ring-2 focus:ring-indigo-500
                           {isErrorShown ? 'border-rose-400 focus:ring-rose-400' : 'border-slate-300 dark:border-slate-700'}"
                       />
@@ -697,6 +707,9 @@
                           appState.updateSelectedRowField(field.key, (e.target as HTMLSelectElement).value);
                           markFieldTouched(field.key);
                         }}
+                        aria-required={isRequired ? 'true' : undefined}
+                        aria-invalid={isErrorShown ? 'true' : 'false'}
+                        aria-describedby={isErrorShown ? `error-${field.id}${field.helpText ? ` help-${field.id}` : ''}` : (field.helpText ? `help-${field.id}` : undefined)}
                         class="w-full px-3.5 py-2 rounded-xl border text-xs bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 transition focus:outline-none focus:ring-2 focus:ring-indigo-500
                           {isErrorShown ? 'border-rose-400 focus:ring-rose-400' : 'border-slate-300 dark:border-slate-700'}"
                       >
@@ -707,19 +720,22 @@
                       </select>
                     {:else if field.type === 'multiselect'}
                       {@const selectedList = (val as string[]) || []}
-                      <div class="space-y-1.5">
+                      <div class="space-y-1.5" role="group" aria-label={field.label}>
                         <div class="flex flex-wrap gap-1.5">
                           {#each field.options || [] as opt}
                             {@const isChecked = selectedList.includes(opt)}
                             <button
                               type="button"
+                              role="checkbox"
+                              aria-checked={isChecked}
+                              aria-label={opt}
                               onclick={() => toggleMultiSelectOption(field.key, opt)}
-                              class="px-2.5 py-1 rounded-lg text-xs font-medium transition flex items-center gap-1.5 cursor-pointer
+                              class="px-2.5 py-1 rounded-lg text-xs font-medium transition flex items-center gap-1.5 cursor-pointer focus-visible:ring-2 focus-visible:ring-indigo-500
                                 {isChecked
                                   ? 'bg-indigo-600 text-white shadow-2xs font-semibold'
                                   : 'bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700'}"
                             >
-                              <span>{isChecked ? '✓' : '+'}</span>
+                              <span aria-hidden="true">{isChecked ? '✓' : '+'}</span>
                               <span>{opt}</span>
                             </button>
                           {/each}
@@ -735,15 +751,15 @@
 
                     <!-- Erreur inline non agressive -->
                     {#if isErrorShown}
-                      <p class="text-xs text-rose-600 dark:text-rose-400 font-medium animate-in fade-in flex items-center gap-1">
-                        <span>⚠</span>
+                      <p id={`error-${field.id}`} role="alert" class="text-xs text-rose-600 dark:text-rose-400 font-medium animate-in fade-in flex items-center gap-1">
+                        <span aria-hidden="true">⚠</span>
                         <span>{fieldError}</span>
                       </p>
                     {/if}
 
                     <!-- Texte d'aide -->
                     {#if !isErrorShown && field.helpText}
-                      <p class="text-[11px] text-slate-400">
+                      <p id={`help-${field.id}`} class="text-[11px] text-slate-400">
                         {field.helpText}
                       </p>
                     {/if}
@@ -764,7 +780,8 @@
                     <span>{FIELD_TYPE_METAS[field.type]?.emoji || '✨'}</span>
                     <span>{field.label}</span>
                     {#if field.rules.required}
-                      <span class="text-rose-500 font-bold" title="Obligatoire">*</span>
+                      <span class="text-rose-500 font-bold" aria-hidden="true">*</span>
+                      <span class="sr-only"> (obligatoire)</span>
                     {/if}
                   </label>
                   <span class="text-[11px] text-slate-400 font-mono">Format {field.wysiwygFormat || 'html'}</span>
@@ -782,8 +799,8 @@
                 />
 
                 {#if isErrorShown}
-                  <p class="text-xs text-rose-600 dark:text-rose-400 font-medium animate-in fade-in flex items-center gap-1">
-                    <span>⚠</span>
+                  <p id={`error-${field.id}`} role="alert" class="text-xs text-rose-600 dark:text-rose-400 font-medium animate-in fade-in flex items-center gap-1">
+                    <span aria-hidden="true">⚠</span>
                     <span>{fieldError}</span>
                   </p>
                 {/if}
@@ -799,14 +816,14 @@
               <div class="p-5 rounded-2xl bg-gradient-to-br from-slate-50 to-indigo-50/30 dark:from-slate-950 dark:to-indigo-950/20 border border-indigo-100/80 dark:border-indigo-900/40 space-y-4">
                 <div class="flex items-center justify-between pb-2 border-b border-indigo-100/60 dark:border-indigo-900/40">
                   <div class="flex items-center gap-2">
-                    <span class="w-5 h-5 rounded-md bg-blue-600 text-white flex items-center justify-center font-black text-xs">
+                    <span class="w-5 h-5 rounded-md bg-blue-600 text-white flex items-center justify-center font-black text-xs" aria-hidden="true">
                       G
                     </span>
                     <h3 class="text-xs font-bold uppercase tracking-wider text-slate-800 dark:text-slate-200">
                       Optimisation SEO Google
                     </h3>
                   </div>
-                  <span class="text-[11px] text-slate-400">Aperçu SERP en temps réel</span>
+                  <span class="text-[11px] text-slate-500 dark:text-slate-400">Aperçu SERP en temps réel</span>
                 </div>
 
                 <!-- Simulation Google SERP dynamique -->
@@ -839,12 +856,13 @@
                           <span>{FIELD_TYPE_METAS[field.type]?.emoji || '🔍'}</span>
                           <span>{field.label}</span>
                           {#if isRequired}
-                            <span class="text-rose-500 font-bold" title="Obligatoire">*</span>
+                            <span class="text-rose-500 font-bold" aria-hidden="true">*</span>
+                            <span class="sr-only"> (obligatoire)</span>
                           {/if}
                         </label>
 
                         {#if field.rules.min !== undefined || field.rules.max !== undefined}
-                          <span class="text-[11px] font-mono {strLen === 0 ? 'text-slate-400' : strLen < (field.rules.min ?? 0) ? 'text-amber-600 font-semibold' : field.rules.max && strLen > field.rules.max ? 'text-rose-600 font-semibold' : 'text-emerald-600 font-semibold'}">
+                          <span class="text-[11px] font-mono {strLen === 0 ? 'text-slate-400' : strLen < (field.rules.min ?? 0) ? 'text-amber-600 dark:text-amber-400 font-semibold' : field.rules.max && strLen > field.rules.max ? 'text-rose-600 dark:text-rose-400 font-semibold' : 'text-emerald-600 dark:text-emerald-400 font-semibold'}">
                             {strLen} {field.rules.min !== undefined ? `/ min ${field.rules.min}` : ''} {field.rules.max !== undefined ? `(max ${field.rules.max})` : ''}
                           </span>
                         {/if}
@@ -861,6 +879,9 @@
                           onblur={() => markFieldTouched(field.key)}
                           placeholder={field.helpText || `Saisissez ${field.label}...`}
                           rows="2"
+                          aria-required={isRequired ? 'true' : undefined}
+                          aria-invalid={isErrorShown ? 'true' : 'false'}
+                          aria-describedby={isErrorShown ? `error-${field.id}${field.helpText ? ` help-${field.id}` : ''}` : (field.helpText ? `help-${field.id}` : undefined)}
                           class="w-full px-3.5 py-2 rounded-xl border text-xs bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 transition focus:outline-none focus:ring-2 focus:ring-indigo-500
                             {isErrorShown ? 'border-rose-400 focus:ring-rose-400 bg-rose-50/20' : 'border-slate-300 dark:border-slate-700'}"
                         ></textarea>
@@ -875,14 +896,17 @@
                           }}
                           onblur={() => markFieldTouched(field.key)}
                           placeholder={field.helpText || `Saisissez ${field.label}...`}
+                          aria-required={isRequired ? 'true' : undefined}
+                          aria-invalid={isErrorShown ? 'true' : 'false'}
+                          aria-describedby={isErrorShown ? `error-${field.id}${field.helpText ? ` help-${field.id}` : ''}` : (field.helpText ? `help-${field.id}` : undefined)}
                           class="w-full px-3.5 py-2 rounded-xl border text-xs bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 transition focus:outline-none focus:ring-2 focus:ring-indigo-500
                             {isErrorShown ? 'border-rose-400 focus:ring-rose-400 bg-rose-50/20' : 'border-slate-300 dark:border-slate-700'}"
                         />
                       {/if}
 
                       {#if isErrorShown}
-                        <p class="text-xs text-rose-600 dark:text-rose-400 font-medium animate-in fade-in flex items-center gap-1">
-                          <span>⚠</span>
+                        <p id={`error-${field.id}`} role="alert" class="text-xs text-rose-600 dark:text-rose-400 font-medium animate-in fade-in flex items-center gap-1">
+                          <span aria-hidden="true">⚠</span>
                           <span>{fieldError}</span>
                         </p>
                       {/if}
